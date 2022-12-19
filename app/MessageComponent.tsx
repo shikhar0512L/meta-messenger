@@ -1,13 +1,15 @@
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Message } from "../typings";
 
 type Props = {
     message: Message
-}
+};
 
 function MessageComponent({ message }: Props) {
 
-const isUser = true;
+    const {data:session} = useSession();
+    const isUser = session?.user?.email === message.email;
 
 
 return (

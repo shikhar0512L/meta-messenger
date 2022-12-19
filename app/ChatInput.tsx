@@ -4,8 +4,13 @@ import { v4 as uuid } from 'uuid';
 import { Message } from '../typings';
 import useSWR from 'swr';
 import fetcher from '../utils/fetchMessages';
+import {unstable_getServerSession} from 'next-auth/next'
 
-const ChatInput = () => {
+type Props = {
+session: Awaited<ReturnType<typeof unstable_getServerSession>>;
+}
+
+const ChatInput = ({session}:Props) => {
 
 const [input , setInput] = useState("");
 const {data : messages, error , mutate} = useSWR("/api/getMessages" , fetcher); 
@@ -16,6 +21,7 @@ const addMessage = async (e: FormEvent<HTMLFormElement> ) => {
 e.preventDefault();
 
 if(!input) return;
+if(!session) return;
 const messageToSend = input;
 setInput("");
 
@@ -25,9 +31,9 @@ const message:Message = {
   id,
   message:messageToSend,
   created_at:Date.now(),
-  username:"Shikhar singh",
-  profilePic:"https://upload.wikimedia.org/wikipedia/commons/a/a0/Pierre-Person.jpg",
-  email:"raginisingh92095@gmail.com"
+  username:session?.user?.name!,
+  profilePic:session?.user?.image!,
+  email:session?.user?.email!
 };
 
 const uploadMessageToUpstash = async() =>{
@@ -57,6 +63,7 @@ await mutate(uploadMessageToUpstash , {
         <form onSubmit={addMessage} className='flex px-10 py-5 space-x-2 fixed bottom-0 z-50 w-full border-t bg-white border-gray-100'>
             <input type="text"
             value={input}
+            disabled={!session}
             onChange={(e)=> setInput(e.target.value)}
             placeholder='Enter Message here...'
             className='flex-1 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 '
