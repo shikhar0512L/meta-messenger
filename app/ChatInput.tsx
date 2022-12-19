@@ -18,7 +18,7 @@ const {data : messages, error , mutate} = useSWR("/api/getMessages" , fetcher);
 
 
 const addMessage = async (e: FormEvent<HTMLFormElement> ) => {
-e.preventDefault();
+ e.preventDefault();
 
 if(!input) return;
 if(!session) return;
